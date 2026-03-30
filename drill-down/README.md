@@ -8,6 +8,7 @@ on your own web server (Apache, Nginx, IIS, Node, Python, etc.).
 | File | Purpose |
 |------|---------|
 | `index.html` | The extension UI — **fully self-contained, no external dependencies** |
+| `config.html` | Developer configuration dialog |
 | `tableau.extensions.1.latest.min.js` | Tableau Extensions API library |
 | `drill-down.trex` | Tableau manifest (edit before use) |
 | `README.md` | This file |
