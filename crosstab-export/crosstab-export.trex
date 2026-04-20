@@ -5,7 +5,7 @@
     <name resource-id="name"/>
     <description>Select and export multiple dashboard worksheets as a multi-tab Excel workbook.</description>
     <author name="deVIZable.com" email="admin@devizable.com" organization="deVIZable.com" website="https://devizable.github.io"/>
-    <min-api-version>1.7</min-api-version>
+    <min-api-version>1.11</min-api-version>
     <source-location>
       <url>https://devizable.github.io/crosstab-export/index.html</url>
     </source-location>
