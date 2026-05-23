@@ -4,7 +4,7 @@
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
     <description>Populate an Excel template with live worksheet data, with optional formula flattening on download.</description>
-    <author name="sandboxed" email="admin@example.com" organization="sandboxed" website="https://github.com"/>
+    <author name="sandboxed" email="admin@example.com" organization="sandboxed" website="https://devizable.github.io/excel-template/README.md"/>
     <min-api-version>1.7</min-api-version>
     <source-location>
       <url>https://devizable.github.io/excel-template/index.html</url>
