@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Lock</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a09;
+    --iron: #2b2926;
+    --iron-light: #4a4640;
+    --bronze: #7a6643;
+    --bronze-light: #a89064;
+    --bronze-dark: #3a2f1e;
+    --engrave: #d6c9a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse at 50% 40%, #1d1a17 0%, var(--bg) 65%),
+      var(--bg);
+    color: var(--engrave); font-family: 'Cormorant SC', Georgia, serif;
+    padding: 16px; user-select: none; -webkit-user-select: none;
+  }
+
+  /* Housing: dark aged bronze with a brushed grain */
+  .lock {
+    position: relative;
+    display: flex; align-items: stretch; gap: 14px;
+    padding: 20px 18px;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(90deg, #ffffff05 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #4c3f29 0%, var(--bronze) 18%, #5d4d32 50%, var(--bronze) 82%, #3b3020 100%);
+    box-shadow:
+      0 18px 50px #000d,
+      0 2px 0 #00000080,
+      inset 0 1px 0 #c9b38a55,
+      inset 0 -2px 3px #00000080,
+      inset 0 0 0 1px var(--bronze-dark);
+    transition: box-shadow .6s;
+  }
+  /* rivets */
+  .lock::before, .lock::after {
+    content: ""; position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #c4ad80, #4a3c26 70%);
+    box-shadow: 0 1px 1px #000a;
+  }
+  .lock::before { left: 6px; }
+  .lock::after { right: 6px; }
+
+  .dials {
+    display: flex; gap: 3px; padding: 4px;
+    background: #0e0d0c; border-radius: 3px;
+    box-shadow: inset 0 2px 6px #000, 0 1px 0 #c9b38a33;
+  }
+  .dial {
+    width: 54px; position: relative;
+    cursor: ns-resize; touch-action: none;
+    /* cylindrical shading on iron */
+    background:
+      repeating-linear-gradient(0deg, #ffffff06 0 1px, transparent 1px 4px),
+      linear-gradient(90deg, #111 0%, var(--iron) 18%, var(--iron-light) 48%, var(--iron) 80%, #111 100%);
+  }
+  .window { height: 150px; overflow: hidden; position: relative; }
+  .window::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, #000 0%, #000a 18%, transparent 40%, transparent 60%, #000a 82%, #000 100%);
+  }
+  .strip { will-change: transform; }
+  .strip.anim { transition: transform .22s cubic-bezier(.3,.7,.4,1); }
+  .letter {
+    height: 50px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.9rem; font-weight: 700;
+    color: #bfb398;
+    /* engraved look */
+    text-shadow: 0 -1px 0 #000, 0 1px 0 #ffffff22;
+    border-bottom: 1px solid #00000055;
+  }
+  .marker {
+    position: absolute; left: -2px; right: -2px; top: 50px; height: 50px; pointer-events: none;
+    border-top: 1px solid #a8906488; border-bottom: 1px solid #a8906488;
+    box-shadow: 0 0 0 1px #00000099;
+  }
+
+  .unlock {
+    width: 64px; border: 0; cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent;
+  }
+  .plunger {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; font-size: .75rem; letter-spacing: .12em; color: #2a2116;
+    text-shadow: 0 1px 0 #d9c69c66;
+    background: radial-gradient(circle at 38% 32%, #c9b48a, var(--bronze-light) 30%, var(--bronze) 60%, #3b3020 100%);
+    box-shadow:
+      0 0 0 4px #1a1611,
+      0 0 0 5px #a8906455,
+      0 4px 6px #000c,
+      inset 0 -3px 5px #00000066;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .unlock:active .plunger {
+    transform: translateY(2px) scale(.97);
+    box-shadow: 0 0 0 4px #1a1611, 0 0 0 5px #a8906455, 0 1px 2px #000c, inset 0 2px 5px #00000088;
+  }
+  .unlock:focus-visible .plunger { outline: 1px solid var(--engrave); outline-offset: 7px; }
+
+  #msg {
+    margin-top: 26px; min-height: 1.6em; font-size: 1.15rem; letter-spacing: .14em;
+    color: #8f846c; text-align: center; transition: opacity .4s; opacity: 0;
+  }
+  #msg.show { opacity: 1; }
+  .shake { animation: shake .35s; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+  .lock.opened {
+    box-shadow: 0 18px 50px #000d, 0 0 40px #c9a95a44,
+      inset 0 1px 0 #c9b38a55, inset 0 -2px 3px #00000080, inset 0 0 0 1px var(--bronze-dark);
+  }
+
+  @media (max-width: 520px) {
+    .dial { width: 40px; }
+    .letter { font-size: 1.4rem; }
+    .lock { flex-direction: column; align-items: center; }
+    .unlock { width: 100%; height: 64px; }
+  }
+</style>
+</head>
+<body>
+  <div class="lock" id="lock">
+    <div class="dials" id="dials"></div>
+    <button class="unlock" id="unlock" aria-label="Open"><span class="plunger">OPEN</span></button>
+  </div>
+  <div id="msg"></div>
+
+<script>
+const ANSWER = "STRAHD";
+const SIZE = 8, COPIES = 5, H = 50;
+const ABC = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const mod = (n, m) => ((n % m) + m) % m;
+
+// Pick filler letters so usage is spread evenly across dials (least-used letters first)
+// and no two dials end up with the same set. Each dial is then sorted alphabetically.
+function buildSets() {
+  const used = Object.fromEntries(ABC.map(c => [c, 0]));
+  const seen = new Set();
+  return [...ANSWER].map(correct => {
+    let set;
+    do {
+      const pool = shuffle(ABC.filter(c => c !== correct)).sort((a, b) => used[a] - used[b]);
+      set = [correct, ...pool.slice(0, SIZE - 1)].sort();
+    } while (seen.has(set.join("")));
+    seen.add(set.join(""));
+    set.forEach(c => used[c]++);
+    return set;
+  });
+}
+
+const dials = buildSets().map((letters, i) => {
+  const correct = ANSWER[i];
+  let pos = Math.random() * SIZE | 0;              // unbounded step counter; letter = letters[mod(pos)]
+  if (letters[pos] === correct) pos = (pos + 1) % SIZE;
+
+  const el = document.createElement("div");
+  el.className = "dial";
+  el.innerHTML = `<div class="window"><div class="strip"></div><div class="marker"></div></div>`;
+  const strip = el.querySelector(".strip");
+  strip.innerHTML = Array(COPIES).fill(letters).flat().map(c => `<div class="letter">${c}</div>`).join("");
+  const mid = Math.floor(COPIES / 2) * SIZE;
+
+  const place = animate => {
+    strip.classList.toggle("anim", animate);
+    strip.style.transform = `translateY(${-(mid + pos - 1) * H}px)`;
+  };
+  // After a turn settles, silently jump back to the middle copy so the wheel can spin forever.
+  const recenter = () => {
+    const n = mod(pos, SIZE);
+    if (n !== pos) { pos = n; place(false); void strip.offsetHeight; }
+  };
+  strip.addEventListener("transitionend", recenter);
+
+  const turn = n => {
+    if (Math.abs(pos + n) >= SIZE * 2) recenter();   // keep within the rendered copies
+    pos += n;
+    place(true);
+  };
+
+  el.addEventListener("wheel", e => { e.preventDefault(); turn(Math.sign(e.deltaY)); }, { passive: false });
+  let startY = null, moved = false;
+  el.addEventListener("pointerdown", e => { startY = e.clientY; moved = false; el.setPointerCapture(e.pointerId); });
+  el.addEventListener("pointermove", e => {
+    if (startY === null) return;
+    const steps = Math.trunc((startY - e.clientY) / 28);
+    if (steps) { turn(steps); startY -= steps * 28; moved = true; }
+  });
+  el.addEventListener("pointerup", e => {
+    if (startY !== null && !moved) {
+      // a tap on the upper half turns up, lower half turns down
+      const r = el.getBoundingClientRect();
+      turn(e.clientY < r.top + r.height / 2 ? -1 : 1);
+    }
+    startY = null;
+  });
+
+  place(false);
+  document.getElementById("dials").appendChild(el);
+  return { get value() { return letters[mod(pos, SIZE)]; } };
+});
+
+const lock = document.getElementById("lock"), msg = document.getElementById("msg");
+document.getElementById("unlock").onclick = () => {
+  const guess = dials.map(d => d.value).join("");
+  lock.classList.remove("shake", "opened");
+  void lock.offsetWidth;
+  msg.classList.add("show");
+  if (guess === ANSWER) {
+    lock.classList.add("opened");
+    msg.style.color = "#c9b07a";
+    msg.textContent = "The mechanism turns. The lock opens.";
+  } else {
+    lock.classList.add("shake");
+    msg.style.color = "#8f846c";
+    msg.textContent = "Nothing happens.";
+  }
+};
+</script>
+</body>
+</html>
